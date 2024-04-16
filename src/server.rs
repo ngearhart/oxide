@@ -15,11 +15,14 @@ pub fn start_server() {
 }
 
 fn handle_connection(mut stream: TcpStream) {
-    let buf_reader = BufReader::new(&mut stream);
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
-    println!("Request: {:#?}", http_request);
+    let mut buf_reader = BufReader::new(&mut stream);
+    let http_request: Vec<_> = buf_reader.fill_buf().unwrap().to_vec();
+
+    buf_reader.consume(http_request.len());
+
+    // let response = "*1\r\n$4\r\npong\r\n";
+    let response = "+PONG\r\n";
+    stream.write_all(response.as_bytes()).unwrap();
+    println!("Request: {:#?}", String::from_utf8(http_request));
+
 }

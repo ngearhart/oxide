@@ -70,6 +70,14 @@ fn get_response_for_payload(message: &String) -> Option<String> {
             .expect("Command unimplemented")
             .execute(payload))
     }
+    else if data_type == DataType::Array {
+        // We know the array length is the next character(s).
+        let mut current_array_message = message.split(LINE_TERMINATOR);
+        current_array_message.next();
+        for message_item in current_array_message {
+            println!("Item: {}", message_item.to_string());
+        }
+    }
     None
 }
 
@@ -84,8 +92,15 @@ pub fn receive_message(message: &String) -> String {
     )
 }
 
-#[test] 
-fn test_get_message_data_type() {
-    assert_eq!(get_message_data_type(&String::from("+test")), Some(DataType::SimpleString));
-    assert_eq!(get_message_data_type(&String::from("sedx")), None);
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test] 
+    fn test_get_message_data_type() {
+        assert_eq!(get_message_data_type(&String::from("+test")), Some(DataType::SimpleString));
+        assert_eq!(get_message_data_type(&String::from("sedx")), None);
+    }
+
+
 }
