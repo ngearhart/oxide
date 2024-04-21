@@ -35,7 +35,7 @@ fn deserialize_trivial(message: &String) -> &String {
     message
 }
 
-fn deserialize_integer(message: &String) -> i64 {
+fn deserialize_integer(message: &str) -> i64 {
     return message.parse::<i64>()
         .expect("Received an invalid int message")
 }
@@ -80,6 +80,63 @@ fn get_response_for_payload(message: &String) -> Option<String> {
     }
     None
 }
+
+pub fn decode_command(command: &String) {
+    // Command arrives as an array of bulk strings.
+    let data_type = get_message_data_type(command)
+        .expect("Invalid message type");
+    assert_eq!(data_type, DataType::Array);
+    assert!(command.len() > 1);
+
+    let mut bulk_strings = command[1..].split(LINE_TERMINATOR);
+
+    let array_length = deserialize_integer(
+        bulk_strings
+        .next()
+        .expect("Could not find first command")
+    );
+    println!("Command length: {}", array_length);
+
+    // Get the command body - second element
+    // Push ahead by 1 + (length size) + (line terminator size)
+    println!("Size: {}", f32::floor(f32::log10(array_length as f32)));
+    let mut command_body = &command[
+        (2 + f32::floor(f32::log10(array_length as f32)) as usize + LINE_TERMINATOR.len())..
+    ];
+    let mut command_name: Option<&str> = None;
+    let mut args: Vec<&str> = Vec::new();
+    for index in 0..array_length {
+        let data_type = get_message_data_type(&String::from(command_body))
+            .expect("Invalid message type");
+        assert_eq!(data_type, DataType::BulkString);
+        let string_length = deserialize_integer(
+            command_body[1..].split(LINE_TERMINATOR).next()
+            .expect("Could not find string length in bulk string")
+        );
+        // Push ahead by 1 + (length size) + (line terminator size)
+        // not sure why I'm using 2
+        println!("Size: {}", f32::floor(f32::log10(string_length as f32)));
+        command_body = &command_body[
+            (2 + f32::floor(f32::log10(string_length as f32)) as usize + LINE_TERMINATOR.len())..
+        ];
+        if index == 0 {
+            command_name = Some(&command_body[..string_length as usize]);
+        } else {
+            args.push(&command_body[..string_length as usize]);
+        }
+
+        // Push ahead by length size + line terminator size
+        command_body = &command_body[string_length as usize + LINE_TERMINATOR.len()..];
+    }
+    println!("Command: {}", command_name.expect("Command name not set"));
+    for argument in args {
+        println!("Args: {}", argument);
+    }
+}
+
+// fn convert_bulk_string(bulk_string: &str) -> &str {
+
+// }
 
 fn encode_response(response: String) -> String {
     format!("{}{}{}", DataType::SimpleString.value(), response, LINE_TERMINATOR)
