@@ -26,7 +26,7 @@ fn handle_connection(mut stream: TcpStream) {
     
     // let response = receive_message(&String::from_utf8(http_request.clone())
     //     .expect("Could not decode"));
-    let command = Command::new();
+    let command = &mut Command::new();
     decode_command(
         &String::from_utf8(http_request.clone()).expect("Could not decode to utf8"),
         command

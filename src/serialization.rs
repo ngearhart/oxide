@@ -66,7 +66,7 @@ fn get_message_data_type(message: &String) -> Option<DataType> {
     None
 }
 
-pub fn decode_command<'a>(command: &'a String, mut result: Command<'a>) {
+pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
     // Command arrives as an array of bulk strings.
     let data_type = get_message_data_type(command)
         .expect("Invalid message type");
@@ -110,7 +110,7 @@ pub fn decode_command<'a>(command: &'a String, mut result: Command<'a>) {
         command_body = &command_body[string_length as usize + LINE_TERMINATOR.len()..];
     }
     log::debug!("Command: {}", result.name);
-    for argument in result.args {
+    for argument in &result.args {
         log::debug!("Args: {}", argument);
     }
 }
@@ -134,4 +134,21 @@ mod tests {
     }
 
 
+    #[test] 
+    fn test_decode_command_ping() {
+        let input = &String::from("*1\r\n$4\r\nping\r\n");
+        let command = &mut Command::new();
+        decode_command(input, command);
+        assert_eq!(command.name, "ping");
+        assert_eq!(command.args.len(), 0);
+    }
+
+    #[test] 
+    fn test_decode_command_ping() {
+        let input = &String::from("*1\r\n$4\r\nping\r\n");
+        let command = &mut Command::new();
+        decode_command(input, command);
+        assert_eq!(command.name, "ping");
+        assert_eq!(command.args.len(), 0);
+    }
 }
