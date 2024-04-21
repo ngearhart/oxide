@@ -1,27 +1,27 @@
 #[derive(strum_macros::Display)]
 #[derive(strum_macros::EnumString)]
-pub enum Command {
+pub enum CommandType {
     PING,
     ECHO
 }
 
-impl Command {
-    fn get_function_to_execute(&self) -> fn(&String) -> String {
+impl CommandType {
+    fn get_function_to_execute(&self) -> fn(Vec<&str>) -> String {
         match self {
-            Command::PING => ping_execute,
-            Command::ECHO => echo_execute,
+            CommandType::PING => ping_execute,
+            CommandType::ECHO => echo_execute,
         }
     }
 
-    pub fn execute(&self, payload: &String) -> String {
-        self.get_function_to_execute()(payload)
+    pub fn execute(&self, args: Vec<&str>) -> String {
+        self.get_function_to_execute()(args)
     }
 }
 
-fn ping_execute(_: &String) -> String {
+fn ping_execute(_: Vec<&str>) -> String {
     "PONG".to_string()
 }
 
-fn echo_execute(payload: &String) -> String {
-    payload.to_string()
+fn echo_execute(args: Vec<&str>) -> String {
+    return args.join(" ");
 }

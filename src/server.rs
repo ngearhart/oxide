@@ -23,7 +23,7 @@ fn handle_connection(mut stream: TcpStream) {
     buf_reader.consume(http_request.len());
 
     // let response = "*1\r\n$4\r\npong\r\n";
-
+    
     // let response = receive_message(&String::from_utf8(http_request.clone())
     //     .expect("Could not decode"));
     let command = Command::new();
@@ -33,6 +33,5 @@ fn handle_connection(mut stream: TcpStream) {
     );
     let response = "+PONG\r\n";
     stream.write_all(response.as_bytes()).unwrap();
-    println!("Request: {:#?}", String::from_utf8(http_request));
-
+    log::debug!("Request: {:#?}", String::from_utf8(http_request));
 }
