@@ -26,12 +26,14 @@ fn handle_connection(mut stream: TcpStream) {
     
     // let response = receive_message(&String::from_utf8(http_request.clone())
     //     .expect("Could not decode"));
+    let raw_command = String::from_utf8(http_request.clone()).expect("Could not decode to utf8");
     let command = &mut Command::new();
     decode_command(
-        &String::from_utf8(http_request.clone()).expect("Could not decode to utf8"),
+        &raw_command,
         command
     );
-    let response = "+PONG\r\n";
+    // let response = "+PONG\r\n";
+    let response = command.execute();
     stream.write_all(response.as_bytes()).unwrap();
     log::debug!("Request: {:#?}", String::from_utf8(http_request));
 }

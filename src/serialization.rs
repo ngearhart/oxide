@@ -1,6 +1,9 @@
 
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
+use std::str::FromStr;
+
+use crate::commands::CommandType;
 
 const LINE_TERMINATOR: &'static str = "\r\n";
 
@@ -45,6 +48,12 @@ impl<'a> Command<'a> {
 
     pub fn add_arg(&mut self, arg: &'a str) {
         self.args.push(arg);
+    }
+
+    pub fn execute(&mut self) -> String {
+        CommandType::from_str(
+            &self.name.expect("Command cannot be null").to_uppercase()
+        ).expect("Unknown command").execute(&self.args)
     }
 }
 
@@ -119,7 +128,7 @@ pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
 
 // }
 
-fn encode_response(response: String) -> String {
+pub fn encode_simple_string(response: String) -> String {
     format!("{}{}{}", DataType::SimpleString.value(), response, LINE_TERMINATOR)
 }
 
