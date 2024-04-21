@@ -4,7 +4,7 @@ use std::{
     net::{TcpListener, TcpStream}
 };
 
-use crate::serialization::decode_command;
+use crate::serialization::{decode_command, Command};
 
 pub fn start_server() {
     let listener = TcpListener::bind("0.0.0.0:6379").unwrap();
@@ -26,7 +26,11 @@ fn handle_connection(mut stream: TcpStream) {
 
     // let response = receive_message(&String::from_utf8(http_request.clone())
     //     .expect("Could not decode"));
-    decode_command(&String::from_utf8(http_request.clone()).expect("Could not decode to utf8"));
+    let command = Command::new();
+    decode_command(
+        &String::from_utf8(http_request.clone()).expect("Could not decode to utf8"),
+        command
+    );
     let response = "+PONG\r\n";
     stream.write_all(response.as_bytes()).unwrap();
     println!("Request: {:#?}", String::from_utf8(http_request));
