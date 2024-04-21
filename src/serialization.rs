@@ -3,7 +3,7 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use std::str::FromStr;
 
-use crate::commands::CommandType;
+use crate::{commands::CommandType, store::Store};
 
 const LINE_TERMINATOR: &'static str = "\r\n";
 
@@ -50,10 +50,10 @@ impl<'a> Command<'a> {
         self.args.push(arg);
     }
 
-    pub fn execute(&mut self) -> String {
+    pub fn execute(&mut self, global_store: &Store) -> String {
         CommandType::from_str(
             &self.name.expect("Command cannot be null").to_uppercase()
-        ).expect("Unknown command").execute(&self.args)
+        ).expect("Unknown command").execute(&self.args, global_store)
     }
 }
 

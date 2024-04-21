@@ -4,19 +4,19 @@ use std::{
     net::{TcpListener, TcpStream}
 };
 
-use crate::serialization::{decode_command, Command};
+use crate::{serialization::{decode_command, Command}, store::Store};
 
-pub fn start_server() {
+pub fn start_server(global_store: &Store) {
     let listener = TcpListener::bind("0.0.0.0:6379").unwrap();
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        handle_connection(stream);
+        handle_connection(stream, global_store);
     }
 }
 
-fn handle_connection(mut stream: TcpStream) {
+fn handle_connection(mut stream: TcpStream, global_store: &Store) {
     let mut buf_reader = BufReader::new(&mut stream);
     let http_request: Vec<_> = buf_reader.fill_buf().unwrap().to_vec();
 
@@ -33,7 +33,7 @@ fn handle_connection(mut stream: TcpStream) {
         command
     );
     // let response = "+PONG\r\n";
-    let response = command.execute();
+    let response = command.execute(global_store);
     stream.write_all(response.as_bytes()).unwrap();
     log::debug!("Request: {:#?}", String::from_utf8(http_request));
 }
