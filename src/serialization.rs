@@ -27,20 +27,20 @@ impl DataType {
 }
 
 pub struct Command<'a> {
-    name: &'a str,
+    name: Option<&'a str>,
     args: Vec<&'a str>
 }
 
 impl<'a> Command<'a> {
     pub fn new() -> Command<'a> {
         Command {
-            name: "",
+            name: None,
             args: Vec::new()
         }
     }
 
     pub fn set_name(&mut self, name: &'a str) {
-        self.name = name;
+        self.name = Some(name);
     }
 
     pub fn add_arg(&mut self, arg: &'a str) {
@@ -109,7 +109,7 @@ pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
         // Push ahead by length size + line terminator size
         command_body = &command_body[string_length as usize + LINE_TERMINATOR.len()..];
     }
-    log::debug!("Command: {}", result.name);
+    log::debug!("Command: {}", result.name.expect("Command should not be None"));
     for argument in &result.args {
         log::debug!("Args: {}", argument);
     }
@@ -126,6 +126,7 @@ fn encode_response(response: String) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::*;
 
     #[test] 
     fn test_get_message_data_type() {
@@ -134,21 +135,21 @@ mod tests {
     }
 
 
-    #[test] 
-    fn test_decode_command_ping() {
-        let input = &String::from("*1\r\n$4\r\nping\r\n");
+    #[rstest]
+    #[case("*1\r\n$4\r\nping\r\n", Some("ping"), 0)]
+    #[case("*2\r\n$4\r\necho\r\n$11\r\nhello world\r\n", Some("echo"), 1)]
+    #[case("*2\r\n$3\r\nget\r\n$3\r\nkey\r\n", Some("get"), 1)]
+    fn test_decode_command(#[case] input: &str, #[case] expected_command_name: Option<&str>, #[case] expected_arg_length: usize) {
+        let input = &String::from(input);
         let command = &mut Command::new();
         decode_command(input, command);
-        assert_eq!(command.name, "ping");
-        assert_eq!(command.args.len(), 0);
-    }
 
-    #[test] 
-    fn test_decode_command_ping() {
-        let input = &String::from("*1\r\n$4\r\nping\r\n");
-        let command = &mut Command::new();
-        decode_command(input, command);
-        assert_eq!(command.name, "ping");
-        assert_eq!(command.args.len(), 0);
+        if expected_command_name.is_none() {
+            assert!(command.name.is_none());
+        } else {
+            assert!(command.name.is_some());
+            assert_eq!(command.name, expected_command_name);
+        }
+        assert_eq!(command.args.len(), expected_arg_length);
     }
 }
