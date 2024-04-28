@@ -4,7 +4,7 @@ mod serialization;
 mod store;
 
 use env_logger::Builder;
-use crate::{server::start_server, store::Store};
+use crate::{server::start_server};
 
 fn main() {
     Builder::new()
@@ -12,7 +12,5 @@ fn main() {
         .init();
     log::info!("Starting");
 
-    let global_store = &Store::new();
-
-    start_server(global_store);
+    start_server();
 }

@@ -1,23 +1,21 @@
 
-use std::collections::{hash_map, HashMap};
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+use std::sync::Mutex;
 
-// Wrapper around HashMap
-pub struct Store<'a> {
-    map: HashMap<&'a str, &'a str>
+lazy_static! {
+    static ref HASHMAP: Mutex<HashMap<String, String>> = {
+        let m = HashMap::new();
+        Mutex::new(m)
+    };
 }
 
-impl<'a> Store<'a> {
-    pub fn new() -> Store<'a> {
-        Store {
-            map: HashMap::new()
-        }
-    }
+pub fn global_store_set(key: String, value: String) {
+    let mut hashmap = HASHMAP.lock().unwrap();
+    hashmap.insert(key, value);
+}
 
-    pub fn set(&mut self, key: &'a str, val: &'a str) {
-        self.map.insert(&key, &val);
-    }
-
-    pub fn get(&mut self, key: &'a str) -> Option<&str> {
-        self.map.get(&key).copied()
-    }
+pub fn global_store_get(key: String) -> String {
+    let hashmap = HASHMAP.lock().unwrap();
+    hashmap.get(&key).expect("Key not found").to_string()
 }
