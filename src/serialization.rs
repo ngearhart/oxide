@@ -73,7 +73,7 @@ fn get_message_data_type(message: &String) -> Option<DataType> {
     None
 }
 
-pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
+pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) -> String {
     // Command arrives as an array of bulk strings.
     let data_type = get_message_data_type(command)
         .expect("Invalid message type");
@@ -87,7 +87,7 @@ pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
         .next()
         .expect("Could not find first command")
     );
-    log::debug!("Command length: {}", array_length);
+    log::trace!("Command length: {}", array_length);
 
     // Get the command body - second element
     // Push ahead by 1 + (length size) + (line terminator size)
@@ -116,10 +116,12 @@ pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
         // Push ahead by length size + line terminator size
         command_body = &command_body[string_length as usize + LINE_TERMINATOR.len()..];
     }
-    log::debug!("Command: {}", result.name.expect("Command should not be None"));
+    log::trace!("Command: {}", result.name.expect("Command should not be None"));
     for argument in &result.args {
-        log::debug!("Args: {}", argument);
+        log::trace!("Args: {}", argument);
     }
+    // Return remaining string
+    command_body.to_string()
 }
 
 // fn convert_bulk_string(bulk_string: &str) -> &str {

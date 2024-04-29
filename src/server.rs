@@ -36,14 +36,20 @@ fn handle_connection(mut stream: TcpStream) {
     // let response = receive_message(&String::from_utf8(http_request.clone())
     //     .expect("Could not decode"));
     let raw_command = String::from_utf8(http_request.clone()).expect("Could not decode to utf8");
-    let command: &mut Command = &mut Command::new();
-    decode_command(
-        &raw_command,
-        command
-    );
-    // let response = "+PONG\r\n";
-    let response = command.execute();
-    stream.write_all(response.as_bytes()).unwrap();
+    let mut response_list: Vec<String> = Vec::new();
+    let mut remaining_body = raw_command;
+    while remaining_body.len() > 0 {
+        let command: &mut Command = &mut Command::new();
+        let old_body = remaining_body.clone();
+        remaining_body = decode_command(
+            &old_body,
+            command
+        );
+        // let response = "+PONG\r\n";
+        let response = command.execute();
+        response_list.push(response);
+    }
+    stream.write_all(response_list.join("").as_bytes()).unwrap();
     log::debug!("Request: {:#?}", String::from_utf8(http_request));
-    log::debug!("Response: {:#?}", response);
+    log::debug!("Response: {:#?}", response_list.join(""));
 }
