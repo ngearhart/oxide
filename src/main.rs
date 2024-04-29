@@ -4,7 +4,7 @@ mod serialization;
 mod store;
 
 use env_logger::Builder;
-use crate::{server::start_server};
+use crate::server::start_server;
 
 fn main() {
     Builder::new()

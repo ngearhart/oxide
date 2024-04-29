@@ -6,6 +6,7 @@ use std::str::FromStr;
 use crate::commands::CommandType;
 
 const LINE_TERMINATOR: &'static str = "\r\n";
+pub const NULL: &'static str = "$-1\r\n";
 
 #[derive(Debug, EnumIter)]
 #[derive(PartialEq)]
