@@ -7,7 +7,7 @@ use threadpool::ThreadPool;
 use crate::serialization::{decode_command, Command};
 
 
-const THREAD_COUNT: usize = 5; 
+const THREAD_COUNT: usize = 5;
 
 
 pub fn start_server() {
