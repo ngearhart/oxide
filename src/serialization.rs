@@ -64,10 +64,6 @@ fn deserialize_integer(message: &str) -> i64 {
         .expect("Received an invalid int message")
 }
 
-fn is_null(message: &String) -> bool {
-    message == "$-1\r\n" || message == "*-1\r\n"
-}
-
 fn get_message_data_type(message: &String) -> Option<DataType> {
     for data_type in DataType::iter() {
         if message.starts_with(data_type.value()) {
@@ -141,6 +137,15 @@ pub fn encode_bulk_string(response: String) -> String {
         LINE_TERMINATOR,
         response,
         LINE_TERMINATOR
+    )
+}
+
+pub fn encode_array(response: Vec<String>) -> String {
+    format!("{}{}{}{}",
+        DataType::Array.value(),
+        response.len(),
+        LINE_TERMINATOR,
+        response.iter().map(|item| encode_bulk_string(item.to_string())).collect::<Vec<String>>().join(""),
     )
 }
 

@@ -1,5 +1,5 @@
-use crate::serialization::{encode_bulk_string, encode_simple_string, NULL, OK};
-use crate::store::{global_store_get, global_store_set};
+use crate::serialization::{encode_array, encode_bulk_string, encode_simple_string, NULL, OK};
+use crate::store::{global_config_get, global_config_get_keys, global_store_get, global_store_set};
 
 #[derive(strum_macros::Display)]
 #[derive(strum_macros::EnumString)]
@@ -7,7 +7,8 @@ pub enum CommandType {
     PING,
     ECHO,
     SET,
-    GET
+    GET,
+    CONFIG
 }
 
 impl CommandType {
@@ -17,6 +18,7 @@ impl CommandType {
             CommandType::ECHO => echo_execute,
             CommandType::SET => set_execute,
             CommandType::GET => get_execute,
+            CommandType::CONFIG => config_execute,
         }
     }
 
@@ -49,4 +51,24 @@ fn get_execute(args: &Vec<& str>) -> String {
         return NULL.to_owned();
     }
     encode_bulk_string(result)
+}
+
+fn config_execute(args: &Vec<& str>) -> String {
+    if args.get(0).expect("CONFIG command sent without clarifier").to_string() == "GET" {
+        return config_get(args);
+    }
+    log::debug!("Received CONFIG SET command (unsupported). Blindly replying with OK");
+    encode_simple_string(OK.to_owned())
+}
+
+fn config_get(args: &Vec<& str>) -> String {
+    let mut response: Vec<String> = Vec::new();
+    for arg in &args[1..] {
+        let keys = global_config_get_keys(arg.to_string());
+        for key in keys {
+            response.push(key.to_string());
+            response.push(global_config_get(key.to_string()));
+        }
+    }
+    encode_array(response)
 }

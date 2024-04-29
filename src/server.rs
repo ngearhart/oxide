@@ -1,7 +1,7 @@
 
 use std::{
     io::{prelude::*, BufReader},
-    net::{TcpListener, TcpStream}, thread
+    net::{TcpListener, TcpStream}
 };
 use threadpool::ThreadPool;
 use crate::serialization::{decode_command, Command};
