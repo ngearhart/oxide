@@ -1,20 +1,29 @@
 
 use std::{
     io::{prelude::*, BufReader},
-    net::{TcpListener, TcpStream}
+    net::{TcpListener, TcpStream}, thread
 };
-
+use threadpool::ThreadPool;
 use crate::serialization::{decode_command, Command};
+
+
+const THREAD_COUNT: usize = 5; 
+
 
 pub fn start_server() {
     let listener = TcpListener::bind("0.0.0.0:6379").unwrap();
 
+    let thread_pool = ThreadPool::new(THREAD_COUNT);
+
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        handle_connection(stream);
+        thread_pool.execute(|| {
+            handle_connection(stream);
+        });
     }
 }
+
 
 fn handle_connection(mut stream: TcpStream) {
     let mut buf_reader = BufReader::new(&mut stream);

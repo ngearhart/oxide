@@ -55,7 +55,7 @@ impl<'a> Command<'a> {
     pub fn execute(&mut self) -> String {
         CommandType::from_str(
             &self.name.expect("Command cannot be null").to_uppercase()
-        ).expect("Unknown command").execute(&self.args)
+        ).expect(&format!("Unknown command: {}", self.name.unwrap())).execute(&self.args)
     }
 }
 
