@@ -1,6 +1,8 @@
 use crate::serialization::{encode_array, encode_bulk_string, encode_simple_string, NULL, OK};
 use crate::store::{global_config_get, global_config_get_keys, global_store_get, global_store_set};
 
+/// Enum of commands that this Redis server can process.
+/// Add a new entry to this enum to support additional commands.
 #[derive(strum_macros::Display)]
 #[derive(strum_macros::EnumString)]
 pub enum CommandType {

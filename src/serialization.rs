@@ -73,6 +73,7 @@ fn get_message_data_type(message: &String) -> Option<DataType> {
     None
 }
 
+/// Decode an incoming string command and write the output into the given Command struct.
 pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) -> String {
     // Command arrives as an array of bulk strings.
     let data_type = get_message_data_type(command)
@@ -124,14 +125,12 @@ pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) -> Stri
     command_body.to_string()
 }
 
-// fn convert_bulk_string(bulk_string: &str) -> &str {
-
-// }
-
+/// Encode a string as the Redis Simple String type.
 pub fn encode_simple_string(response: String) -> String {
     format!("{}{}{}", DataType::SimpleString.value(), response, LINE_TERMINATOR)
 }
 
+/// Encode a bulk string as the Redis Bulk String type.
 pub fn encode_bulk_string(response: String) -> String {
     format!("{}{}{}{}{}",
         DataType::BulkString.value(),
@@ -142,6 +141,7 @@ pub fn encode_bulk_string(response: String) -> String {
     )
 }
 
+/// Encode an array of Strings as the Redis Array type.
 pub fn encode_array(response: Vec<String>) -> String {
     format!("{}{}{}{}",
         DataType::Array.value(),

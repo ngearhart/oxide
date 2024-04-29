@@ -7,11 +7,13 @@ use std::sync::Mutex;
 use crate::serialization::NULL;
 
 lazy_static! {
+    /// Global data storage for key/value pairs. Thread safe.
     static ref HASHMAP: Mutex<HashMap<String, String>> = {
         let m = HashMap::new();
         Mutex::new(m)
     };
 
+    /// Global configuration storage. Thread safe.
     static ref CONFIG: Mutex<HashMap<String, String>> = {
         let mut m = HashMap::new();
         // Defaults
@@ -30,11 +32,11 @@ pub fn global_store_get(key: String) -> String {
     hashmap.get(&key).unwrap_or(&NULL.to_owned()).to_string()
 }
 
-
-pub fn global_config_set(key: String, value: String) {
-    let mut hashmap = CONFIG.lock().unwrap();
-    hashmap.insert(key, value);
-}
+// Not implemented.
+// pub fn global_config_set(key: String, value: String) {
+//     let mut hashmap = CONFIG.lock().unwrap();
+//     hashmap.insert(key, value);
+// }
 
 pub fn global_config_get(key: String) -> String {
     let hashmap = CONFIG.lock().unwrap();
@@ -50,6 +52,8 @@ pub fn global_config_get_keys(match_text: String) -> Vec<String> {
     hashmap.keys().find(|key| key.to_string() == match_text).into_iter().map(|x| x.to_string()).collect::<Vec<String>>()
 }
 
+/// Insert a bunch of config defaults based on with what a vanilla Redis server would respond.
+/// I know this is ugly. Sorry.
 fn populate_config_defaults(m: &mut HashMap<String, String>) {
     m.insert("replica-read-only".to_owned(), "yes".to_owned());
     m.insert("stream-node-max-bytes".to_owned(), "4096".to_owned());
