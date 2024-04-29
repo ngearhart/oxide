@@ -1,4 +1,4 @@
-use crate::serialization::{encode_simple_string, NULL};
+use crate::serialization::{encode_bulk_string, encode_simple_string, NULL, OK};
 use crate::store::{global_store_get, global_store_set};
 
 #[derive(strum_macros::Display)]
@@ -30,7 +30,7 @@ fn ping_execute<'a>(_: &Vec<&str>) -> String {
 }
 
 fn echo_execute<'a>(args: &Vec<&str>) -> String {
-    encode_simple_string(args.join(" "))
+    encode_bulk_string(args.join(" "))
 }
 
 fn set_execute(args: &Vec<&str>) -> String {
@@ -38,7 +38,7 @@ fn set_execute(args: &Vec<&str>) -> String {
     let key = args.get(0).expect("Missing key");
     let val = args.get(1).expect("Missing value");
     global_store_set(key.to_string(), val.to_string());
-    encode_simple_string("OK".to_string())
+    encode_simple_string(OK.to_owned())
 }
 
 fn get_execute(args: &Vec<& str>) -> String {
@@ -48,5 +48,5 @@ fn get_execute(args: &Vec<& str>) -> String {
     if result == NULL {
         return NULL.to_owned();
     }
-    encode_simple_string(result)
+    encode_bulk_string(result)
 }

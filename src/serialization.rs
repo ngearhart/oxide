@@ -7,6 +7,7 @@ use crate::commands::CommandType;
 
 const LINE_TERMINATOR: &'static str = "\r\n";
 pub const NULL: &'static str = "$-1\r\n";
+pub const OK: &'static str = "OK";
 
 #[derive(Debug, EnumIter)]
 #[derive(PartialEq)]
@@ -131,6 +132,16 @@ pub fn decode_command<'a>(command: &'a String, result: &mut Command<'a>) {
 
 pub fn encode_simple_string(response: String) -> String {
     format!("{}{}{}", DataType::SimpleString.value(), response, LINE_TERMINATOR)
+}
+
+pub fn encode_bulk_string(response: String) -> String {
+    format!("{}{}{}{}{}",
+        DataType::BulkString.value(),
+        response.len(),
+        LINE_TERMINATOR,
+        response,
+        LINE_TERMINATOR
+    )
 }
 
 #[cfg(test)]
